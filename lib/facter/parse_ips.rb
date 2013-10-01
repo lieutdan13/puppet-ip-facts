@@ -19,6 +19,36 @@ def is_private(interface)
   end
 end
  
+def is_private_192(interface)
+  rfc1918_16bitblock = Regexp.new('^192\.168\.')
+  ip = Facter::Util::IP.get_interface_value(interface, 'ipaddress')
+  if rfc1918_16bitblock.match(ip)
+    true
+  else
+    false
+  end
+end
+ 
+def is_private_172(interface)
+  rfc1918_20bitblock = Regexp.new('^172\.(?:1[6-9]|2[0-9]|3[0-1])\.')
+  ip = Facter::Util::IP.get_interface_value(interface, 'ipaddress')
+  if rfc1918_20bitblock.match(ip)
+    true
+  else
+    false
+  end
+end
+ 
+def is_private_10(interface)
+  rfc1918_24bitblock = Regexp.new('^10\.')
+  ip = Facter::Util::IP.get_interface_value(interface, 'ipaddress')
+  if rfc1918_24bitblock.match(ip)
+    true
+  else
+    false
+  end
+end
+ 
 def find_networks
   found_public = found_private = false
   Facter::Util::IP.get_interfaces.each do |interface|
@@ -80,6 +110,54 @@ Facter.add(:ipaddress_private) do
     Facter::Util::IP.get_interfaces.each do |interface|
       if has_address(interface)
         if is_private(interface)
+          ip = Facter::Util::IP.get_interface_value(interface, 'ipaddress')
+          break
+        end
+      end
+    end
+    ip
+  end
+end
+ 
+Facter.add(:ipaddress_private_192) do
+  confine :kernel => Facter::Util::IP.supported_platforms
+  setcode do
+    ip=""
+    Facter::Util::IP.get_interfaces.each do |interface|
+      if has_address(interface)
+        if is_private_192(interface)
+          ip = Facter::Util::IP.get_interface_value(interface, 'ipaddress')
+          break
+        end
+      end
+    end
+    ip
+  end
+end
+ 
+Facter.add(:ipaddress_private_172) do
+  confine :kernel => Facter::Util::IP.supported_platforms
+  setcode do
+    ip=""
+    Facter::Util::IP.get_interfaces.each do |interface|
+      if has_address(interface)
+        if is_private_172(interface)
+          ip = Facter::Util::IP.get_interface_value(interface, 'ipaddress')
+          break
+        end
+      end
+    end
+    ip
+  end
+end
+ 
+Facter.add(:ipaddress_private_10) do
+  confine :kernel => Facter::Util::IP.supported_platforms
+  setcode do
+    ip=""
+    Facter::Util::IP.get_interfaces.each do |interface|
+      if has_address(interface)
+        if is_private_10(interface)
           ip = Facter::Util::IP.get_interface_value(interface, 'ipaddress')
           break
         end
